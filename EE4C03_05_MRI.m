@@ -21,12 +21,19 @@ for slice = 1:8
     Data_img(:,:,2) = ifftshift(ifft2(squeeze(slices(slice, 2, :, :))),1);
     %channel 3
     Data_img(:,:,3) = ifftshift(ifft2(squeeze(slices(slice, 3, :, :))),1);
-
+    
     eye_raw  = sqrt( abs(squeeze(Data_img(:,:,1))).^2 + abs(squeeze(Data_img(:,:,2))).^2 + abs(squeeze(Data_img(:,:,3))).^2);
     imagesc(eye_raw);
     axis image
     colormap gray
     axis off
+end
+
+for slice = 1:8
+    figure
+    imagesc(100*log(abs(  squeeze(slices(slice, 1, :, :))   )));
+    imagesc(100*log(abs(  squeeze(slices(slice, 2, :, :))   )));
+    imagesc(100*log(abs(  squeeze(slices(slice, 2, :, :))   )));
 end
 
 %%
@@ -74,7 +81,7 @@ axis off
 
 % Spatial frequency observations
 figure(2); 
-imagesc(100*log(abs(slice1_channel1_goodData)));
+imagesc(100*log(abs(squeeze(slices(1,1,:,:)))));
 
 
 xlabel('Horizontal frequency bins')
