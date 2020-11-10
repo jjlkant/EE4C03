@@ -36,6 +36,28 @@ for slice = 1:8
     imagesc(100*log(abs(  squeeze(slices(slice, 2, :, :))   )));
 end
 
+close all
+% create autocorrelation values %
+p = 6; %filter order
+slice11 = squeeze(slices(1,1,:,:));
+r = zeros(1, p+1);
+for k = 0:p
+    for n = k:15
+        r(k+1,:) = slice11(:,n+1) * conj( slice11(:,n-k+1) );
+    end
+end
+plot(abs(r))
+Rx = toeplitz(r(1:end-1));
+
+% determine filter %
+a = linsolve(Rx,-r(2:end)');
+sum = 0;
+for k = 1:p-1
+    sum = a(k+1)*conj((r(k+1))) + sum;
+end
+e_p = sum + r(1); 
+b = sqrt(e_p);
+
 %%
 % clear compensation, preparation, based on fourier transformed blinked 
 % k-space data (Data_raw)
