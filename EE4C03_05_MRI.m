@@ -11,23 +11,23 @@ slices = load_slices();
 % 1. X - dimension of the K-Space data    - 128
 % 2. Y - dimension of the K-Space data    - 512
 
+for slice = 1:8
+    figure;
+    % IFFT of k-space data
+    %channel 1 (replace "slice1_channel1_goodData" with
+    %slice1_channel1_badData) for bad images
+    Data_img(:,:,1) = ifftshift(ifft2(squeeze(slices(slice, 1, :, :))),1);
+    %channel 2
+    Data_img(:,:,2) = ifftshift(ifft2(squeeze(slices(slice, 2, :, :))),1);
+    %channel 3
+    Data_img(:,:,3) = ifftshift(ifft2(squeeze(slices(slice, 3, :, :))),1);
 
-% IFFT of k-space data
-%channel 1 (replace "slice1_channel1_goodData" with
-%slice1_channel1_badData) for bad images
-Data_img(:,:,1) = ifftshift(ifft2(slices(1, 1, :, :)),1);
-%channel 2
-Data_img(:,:,2) = ifftshift(ifft2(slices(1, 2, :, :)),1);
-%channel 3
-Data_img(:,:,3) = ifftshift(ifft2(slices(1, 3, :, :)),1);
-
-eye_raw  = sqrt( abs(squeeze(Data_img(:,:,1))).^2 + abs(squeeze(Data_img(:,:,2))).^2 + abs(squeeze(Data_img(:,:,3))).^2);
-imagesc(eye_raw);
-axis image
-colormap gray
-axis off
-%%
-slices = load_slices();
+    eye_raw  = sqrt( abs(squeeze(Data_img(:,:,1))).^2 + abs(squeeze(Data_img(:,:,2))).^2 + abs(squeeze(Data_img(:,:,3))).^2);
+    imagesc(eye_raw);
+    axis image
+    colormap gray
+    axis off
+end
 
 %%
 % clear compensation, preparation, based on fourier transformed blinked 
