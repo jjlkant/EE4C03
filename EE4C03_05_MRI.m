@@ -39,31 +39,48 @@ end
 close all
 %% utilize autocorrelation method %%
 
-p = 5; %filter order
+p = 100; %filter order
 slice11 = squeeze(slices(1,1,:,:));
-Good_Columns = 15; % number of good column before outlier
+Good_Columns = 53; % number of good column before outlier
 N = Good_Columns - 1;
-r = zeros(512, p+1); % row corresponds to row number of data, column corresponds to lag
+r = zeros(512, p+2); % row corresponds to row number of data, column corresponds to lag
 
 % compute autocorrelation %
-for k = 0:p
+for k = 0:p+1
     for n = k:N
-        r(:,k+1) = slice11(:,n+1) .* conj( slice11(:,n-k+1) ) + r(:,k+1);
+        r(1,k+1) = slice11(1,n+1) .* conj( slice11(1,n-k+1) ) + r(1,k+1);
     end
 end
 
 plot(abs(r(1,:)))
-Rx = toeplitz(r(1, 1:end-1));
+Rx = toeplitz(r(1, 1:end-1)');
 
-% determine filter %
+%a = linsolve(Rx,-r(1, 2:end)'); % remember first element a is 1 which is not in this vector
 
-a = linsolve(Rx,-r(1, 2:end)'); % remember first element a is 1 which is not in this vector
-sum = 0;
-for k = 1:p
-    sum = a(k)*conj((r(1,k+1))) + sum;
+% implement Levinson algorithm %
+r_p_vec = flip( r(1,2:p+2) );
+a_p = zeros(p+1,p+1); % column i contains solution for filter order i-1
+a_p(1,1) = 1;
+error = zeros(1,p+1); % minimum error for each filter order
+error(1) = r(1,1);
+for i = 0:p-1
+    
+    gamma = r_p_vec(end-i:end) * a_p(1:i+1, i+1);
+    
+    rho = gamma/conj(error(i+1)); 
+    
+    if abs(rho) > 1
+        disp('Watch out Magnitude Reflection greater than one')
+        pause(inf)
+    end
+    
+    a_p(1:i+2, i+2) = [a_p(1:i+1, i+1);0] - rho*conj(flip([a_p(1:i+1, i+1);0]));
+    error(i+2) = error(i+1)*( 1- (abs(rho)^2) );
+    
 end
-e_p = sum + r(1,1); 
-b = sqrt(e_p);
+
+b = sqrt(error(p+1));
+plot(error)
 
 %%
 % clear compensation, preparation, based on fourier transformed blinked 
