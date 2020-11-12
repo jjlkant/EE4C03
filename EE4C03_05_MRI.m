@@ -1,11 +1,5 @@
 clc; clear all; close all;
-
-% n = 1;
-% 
-% load(strcat('Slice',int2str(n),'/BadData/slice',int2str(n),'_channel1.mat'));
-% load(strcat('Slice',int2str(n),'/BadData/slice',int2str(n),'_channel2.mat'));
-% load(strcat('Slice',int2str(n),'/BadData/slice',int2str(n),'_channel3.mat'));
-
+%%
 slices = load_slices();
 
 % 1. X - dimension of the K-Space data    - 128
@@ -22,20 +16,47 @@ for slice = 1:8
     %channel 3
     Data_img(:,:,3) = ifftshift(ifft2(squeeze(slices(slice, 3, :, :))),1);
     
+    % PCA Image Fusion %
+    imf1 = pca(Data_img(:,:,1), Data_img(:,:,2), Data_img(:,:,3));
+    % DCT Image Fusion %
+    block_size = 16;
+    imf2 = dct_av(Data_img(:,:,1), Data_img(:,:,2), Data_img(:,:,3), block_size);
+    imf3 = dct_ma(Data_img(:,:,1), Data_img(:,:,2), Data_img(:,:,3), block_size);    
+    
     eye_raw  = sqrt( abs(squeeze(Data_img(:,:,1))).^2 + abs(squeeze(Data_img(:,:,2))).^2 + abs(squeeze(Data_img(:,:,3))).^2);
+    subplot(141);
     imagesc(eye_raw);
+    title("eye raw")
+    axis image
+    colormap gray
+    axis off
+    subplot(142);
+    imagesc(imf1);
+    title("PCA")
+    axis image
+    colormap gray
+    axis off
+    subplot(143);
+    imagesc(imf2);
+    title("DCT (average)")
+    axis image
+    colormap gray
+    axis off
+    subplot(144);
+    imagesc(imf3);
+    title("DCT (max)")
     axis image
     colormap gray
     axis off
 end
-
+%%
 for slice = 1:8
     figure
     imagesc(100*log(abs(  squeeze(slices(slice, 1, :, :))   )));
     imagesc(100*log(abs(  squeeze(slices(slice, 2, :, :))   )));
     imagesc(100*log(abs(  squeeze(slices(slice, 3, :, :))   )));
 end
-
+%%
 close all
 %% utilize autocorrelation method %%
 
